@@ -37,20 +37,47 @@ svg.addEventListener('pointerdown',e=>{if(!e.target.closest('.h,.mkh'))off()});
 
 //#match-start
 // ---------- 3. Match a visitor's thought to the closest classmate thoughts (shared words) ----------
-const STOP=new Set('a an the and or but i me my we our you your it its is am are was were be been to of in on at for with so if that this these those can cant dont do does did not no just really very have has had will would should could how what why when who where about think thought keep again there than then them they'.split(' '));
+// Meaning-based hints: if the typed text matches the pattern on the left, that classmate thought (middle) gets extra points (right).
+// Add your own lines here. The middle text must be written exactly as it appears in data.js.
+const CONCEPTS=[
+ [/\b(dream|goal|success|fail|enough|worth|proud|prove|achiev|fulfil|talent|capable|deserve|compare|behind)/,'Am I doing enough?',3],
+ [/\bam i\b/,'Am I doing well in general?',2],
+ [/\b(mom|mother|dad|father|parent|sister|brother|grandm|grandp)/,'I miss my family.',3],
+ [/\b(lonely|alone|friend)/,'I miss traveling with my friend.',3],
+ [/\b(money|rent|tuition|bills?|loan|debt|expens)/,'Did I pay my rent this month?',3],
+ [/\b(health|sick|pain|doctor|diet|weight)/,'I worry about my health.',3],
+ [/\b(career|job|graduat|intern|resume|hired?)/,'What should I do in the future?',3],
+ [/\b(due|homework|exam|essay|grade|project)/,'I haven’t finished my assignment.',3],
+ [/\b(insomnia|awake|tired|bedtime|nap)/,'I should go to sleep.',3],
+ [/\b(anxi|worr|stress|panic|overwhelm|scared|afraid|nervous)/,'I feel anxious every day.',3],
+ [/\b(embarrass|awkward|cring|rude)/,'I think about an awkward moment.',3],
+ [/\b(childhood|nostalg|back home|my ex)/,'I think about good memories from the past.',3],
+ [/\b(exist|meaning|faith|universe)/,'I think about life.',3]
+];
+const STOP=new Set('a an the and or but i me my we our you your it its is am are was were be been to of in on at for with so if that this these those can cant dont do does did not no just really very have has had will would should could how what why when who where about think thought keep again feel there than then them they'.split(' '));
 const tok=s=>(s.toLowerCase().replace(/[’']/g,'').match(/[a-z]+/g)||[]).map(w=>w.replace(/(ing|ed|es|s)$/,'')).filter(w=>w.length>2&&!STOP.has(w));
 const TK=D.map(d=>new Set(tok(d[0]))),df={};
 TK.forEach(s=>s.forEach(w=>df[w]=(df[w]||0)+1));
 const idf=w=>Math.log(1+D.length/(df[w]||1));   // rare shared words count more
 function match(text){
- const q=tok(text);let best=-1,bs=0;
- const sc=TK.map((s,i)=>{let x=0;q.forEach(w=>{if(s.has(w))x+=idf(w)});if(x>bs){bs=x;best=i}return x});
+ const q=tok(text),low=text.toLowerCase();let best=-1,bs=0;
+ const sc=TK.map(s=>{let x=0;q.forEach(w=>{if(s.has(w))x+=idf(w)});return x});
+ CONCEPTS.forEach(([re,like,pts])=>{if(re.test(low)){const i=D.findIndex(d=>d[0]===like);if(i>=0)sc[i]+=pts}});
+ sc.forEach((x,i)=>{if(x>bs){bs=x;best=i}});
  if(bs<1.2)return null;                           // 1.2 = how strict matching is; raise it to be stricter
- const g=D[best][3],seen=new Set(),near=[];
+ const g=D[best][3],seen={},near=[];
  sc.map((x,i)=>[x,i]).filter(p=>D[p[1]][3]===g).sort((u,v)=>v[0]-u[0]||Math.random()-.5).forEach(([x,i])=>{
-  const t=D[i][0];if(!seen.has(t)&&t.toLowerCase()!==text.trim().toLowerCase()){seen.add(t);near.push(t)}});
- return{g,best,near:near.slice(0,6)}}
+  const t=D[i][0];seen[t]=(seen[t]||0)+1;if(seen[t]<=4)near.push(t)});   // a phrase can repeat up to 4 times, like in your draft
+ return{g,best,near:near.slice(0,10)}}
 //#match-end
+
+// Scatter similar phrases around the visitor's thought (positions are % of the stage: [left, top])
+const SLOTS=[[22,13],[52,6],[80,15],[13,34],[87,36],[14,66],[86,64],[24,88],[52,94],[78,86]];
+function scatter(list){const st=$('stage');st.querySelectorAll('.ph').forEach(e=>e.remove());
+ const cnt={};list.forEach(t=>cnt[t]=(cnt[t]||0)+1);
+ list.slice(0,SLOTS.length).forEach((t,i)=>{const p=document.createElement('div');p.className='ph'+(cnt[t]>1?' rep':'');p.textContent='“'+t+'”';
+  p.style.cssText='left:'+SLOTS[i][0]+'%;top:'+SLOTS[i][1]+'%;--r:'+((i*37%7)-3)+'deg;animation-delay:'+(i*.12)+'s,'+(i*.7)+'s;animation-duration:.9s,'+(7+i%4)+'s';st.append(p)})}
+const CRISIS=/\b(suicid|kill myself|end my life|want to die|self.?harm|hurt myself|better off dead)/i;
 
 // ---------- 4. The visitor's own thought on the circle, and moving between screens ----------
 let you='',hit=null,mk=null;
@@ -61,13 +88,16 @@ function mark(th){drop();mk=ns('g',{});const x=cx+R*Math.cos(th),y=cy-R*Math.sin
 function showYou(){if(hit)light(hit.g);else clear();c.innerHTML='<b>“'+esc(you)+'”</b><span>Your thought</span>'}
 svg.addEventListener('pointerover',e=>{if(e.target.closest('.mkh'))showYou()});
 $('go').onclick=()=>{const v=$('t').value.trim();if(!v){$('t').focus();return}
- you=v;hit=match(v);$('you').textContent='“'+v+'”';
- $('near').innerHTML=hit?hit.near.map((t,i)=>'<span class="chip" style="animation-delay:'+(i*.15)+'s">“'+esc(t)+'”</span>').join(''):'';
+ if(CRISIS.test(v)){you='';hit=null;$('stage').style.display='none';$('h2').textContent='Thank you for writing that down';
+  $('p2').textContent='This project can’t respond to something this heavy, and your words won’t be added. If you might hurt yourself, please contact someone you trust or a crisis line now. In the US, you can call or text 988.';
+  $('join').textContent='Start again';$('join').dataset.mode='again';go(2);return}
+ $('stage').style.display='';$('join').textContent='Let it join the circle';$('join').dataset.mode='';
+ you=v;hit=match(v);$('you').textContent='“'+v+'”';scatter(hit?hit.near:[]);
  $('h2').textContent=hit?'Your thought has company':'Yours is new to this collection';
  $('p2').textContent=hit?'These classmates wrote something close. The match comes from shared words and a theme coded by hand, so it is a suggestion, not a measurement.':'No classmate wrote anything close to it. It can still join the circle.';
  go(2)};
 $('skip').onclick=()=>{you='';hit=null;drop();off();go(3)};
-$('join').onclick=()=>{off();mark(hit?A[hit.best]:Math.PI/2);go(3)};
+$('join').onclick=()=>{if($('join').dataset.mode==='again')return $('again').onclick();off();mark(hit?A[hit.best]:Math.PI/2);go(3)};
 $('next').onclick=()=>go(4);
 $('back').onclick=()=>go(3);
 $('again').onclick=()=>{$('t').value='';you='';hit=null;drop();off();go(1)};
