@@ -20,9 +20,14 @@ button{font:inherit;font-size:15px;padding:10px 20px;border-radius:999px;border:
 button.pri{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 button:focus-visible,textarea:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
 .note,.key{font-size:14px;color:var(--mut);max-width:560px;margin:12px auto}
-.you{font-size:clamp(24px,5vw,38px);font-weight:700;letter-spacing:-.02em;margin:8px auto 20px;max-width:620px}
-#near{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:0 auto 28px;max-width:680px}
-.chip{padding:8px 14px;border-radius:999px;background:var(--card);color:var(--mut);font-size:15px;animation:fade .8s ease both}
+/* SCREEN 2: the visitor's thought in the middle, similar classmate thoughts scattered around it */
+#stage{position:relative;height:clamp(440px,72vh,640px);margin:8px 0 24px}
+.you{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58%;margin:0;font-size:clamp(26px,5.4vw,52px);font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.ph{position:absolute;max-width:27%;transform:translate(-50%,-50%) rotate(var(--r));color:var(--mut);font-size:clamp(13px,1.9vw,18px);line-height:1.3;opacity:.8;animation:fi .9s ease both,drift 9s ease-in-out infinite alternate}
+.ph.rep{font-size:clamp(18px,3vw,28px);color:var(--fg)}
+@keyframes fi{from{opacity:0}}
+@keyframes drift{from{translate:0 -5px}to{translate:0 5px}}
+@media (max-width:560px){.ph:nth-child(n+8){display:none}.ph{max-width:40%}}
 .wrap{position:relative;margin:8px 0}
 svg{display:block;width:100%;height:auto}
 #c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36%;pointer-events:none}
