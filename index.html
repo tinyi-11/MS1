@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Where thoughts go</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<header>Where thoughts go</header>
+<main>
+<!-- SCREEN 1: write a thought -->
+<section id="s1" class="screen on">
+<p class="eyebrow">A collective portrait of recurring thoughts</p>
+<h1>What keeps you up at night?</h1>
+<p class="lead">Some thoughts keep coming back. This project gathers 139 of them from 32 DT students.</p>
+<label for="t">Write down one thought that keeps coming back.</label>
+<textarea id="t" rows="3" placeholder="I keep thinking about…"></textarea>
+<div class="row"><button id="go" class="pri">Leave it here for now</button><button id="skip">Explore without writing</button></div>
+<p class="note">Your thought stays in this browser tab. It is not saved and not added to the 139 research thoughts.</p>
+</section>
+<!-- SCREEN 2: similar thoughts -->
+<section id="s2" class="screen">
+<p class="eyebrow">The thought you brought</p>
+<div id="you" class="you"></div>
+<div id="near"></div>
+<h2 id="h2"></h2>
+<p id="p2" class="lead"></p>
+<button id="join" class="pri">Let it join the circle</button>
+</section>
+<!-- SCREEN 3: the circle -->
+<section id="s3" class="screen">
+<p class="eyebrow">The collective inner monologue</p>
+<h2>Where do these thoughts point?</h2>
+<p class="lead">Point at a line to light up similar thoughts, then move along the lit lines to read them.</p>
+<div class="wrap"><svg id="svg" viewBox="0 0 900 900" role="img" aria-label="A circle of 139 lines, one per thought. Lines pointing in are about the past, lines on the ring are about now, lines pointing out are about the future."></svg><div id="c"></div></div>
+<p class="key">Each line is one thought. On the ring: about right now. Pointing in: looking back. Pointing out: looking ahead. A longer line means more classmates wrote the same thing. Color shows the topic.</p>
+<button id="next" class="pri">Continue</button>
+</section>
+<!-- SCREEN 4: closing -->
+<section id="s4" class="screen">
+<p class="eyebrow">There is no empty circle</p>
+<h2>Some thoughts leave. Some return. Others take their place.</h2>
+<p class="lead">A way of seeing it: recurring thoughts may not be problems that can be permanently completed or removed. Seeing them together makes repetition visible—not as a personal failure, but as part of a shared mental life.</p>
+<p class="note">The circle shows 139 thoughts from 32 classmates, collected once. It doesn’t show how thoughts change over time.</p>
+<div class="row"><button id="again" class="pri">Bring another thought</button><button id="back">Back to the circle</button></div>
+<p class="note">If these thoughts feel overwhelming, talk to someone you trust.</p>
+</section>
+</main>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body></html>

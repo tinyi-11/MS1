@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Where thoughts go</title>
+<style>
+/* COLOURS: change them here. Light theme first, dark theme (used automatically on dark devices) below. */
+:root{--bg:#faf8f4;--fg:#222;--mut:#666;--ring:#555;--line:#cfcac2;--card:#efebe3;--c0:#d1583b;--c1:#3d5a80;--c2:#4f9475;--c3:#d19a2e;--c4:#6d597a;--c5:#b56576;--c6:#7b869c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a19;--fg:#eee;--mut:#a8a49e;--ring:#999;--line:#4a4743;--card:#2a2826;--c0:#ef8f74;--c1:#7ea2d1;--c2:#8fcdb0;--c3:#f2cc8f;--c4:#b49ac4;--c5:#e08fa1;--c6:#aab4c9;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1a19;--fg:#eee;--mut:#a8a49e;--ring:#999;--line:#4a4743;--card:#2a2826;--c0:#ef8f74;--c1:#7ea2d1;--c2:#8fcdb0;--c3:#f2cc8f;--c4:#b49ac4;--c5:#e08fa1;--c6:#aab4c9;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:16px 20px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+main{max-width:860px;margin:0 auto;padding:8px 20px 56px}
+.screen{display:none;text-align:center}
+.screen.on{display:block;animation:fade .5s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:24px 0 12px}
+h1,h2{margin:0 0 16px;line-height:1.05;letter-spacing:-.03em;font-weight:700}
+h1{font-size:clamp(38px,8vw,68px)}h2{font-size:clamp(28px,5vw,44px)}
+.lead{color:var(--mut);max-width:560px;margin:0 auto 24px}
+label{display:block;max-width:560px;margin:0 auto 8px;text-align:left;font-size:14px;color:var(--mut)}
+textarea{display:block;box-sizing:border-box;width:100%;max-width:560px;margin:0 auto 16px;padding:14px;font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:12px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:16px 0}
+button{font:inherit;font-size:15px;padding:10px 20px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+button.pri{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+.note,.key{font-size:14px;color:var(--mut);max-width:560px;margin:12px auto}
+.you{font-size:clamp(24px,5vw,38px);font-weight:700;letter-spacing:-.02em;margin:8px auto 20px;max-width:620px}
+#near{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:0 auto 28px;max-width:680px}
+.chip{padding:8px 14px;border-radius:999px;background:var(--card);color:var(--mut);font-size:15px;animation:fade .8s ease both}
+.wrap{position:relative;margin:8px 0}
+svg{display:block;width:100%;height:auto}
+#c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36%;pointer-events:none}
+#c b{display:block;font-size:clamp(14px,2.6vw,21px);line-height:1.3}
+#c span{display:block;font-size:clamp(11px,1.9vw,15px);color:var(--mut);margin-top:6px}
+.v{stroke-linecap:round;stroke-width:2.2;transition:opacity .15s}
+.h{stroke:transparent;stroke-width:9;stroke-linecap:round;cursor:pointer}
+svg.dim .v{opacity:.12}svg.dim .v.on{opacity:1;stroke-width:3.2}svg .v.cur{opacity:1;stroke-width:5}
+svg text{fill:var(--fg);font-size:15px;text-anchor:middle}
+.dot{fill:var(--fg)}.yl{font-size:13px;font-weight:600}
+.pulse{fill:var(--fg);transform-box:fill-box;transform-origin:center;animation:pu 1.8s ease-out infinite}
+@keyframes pu{from{transform:scale(.6);opacity:.5}to{transform:scale(2.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<header>Where thoughts go</header>
+<main>
+<!-- SCREEN 1: write a thought -->
+<section id="s1" class="screen on">
+<p class="eyebrow">A collective portrait of recurring thoughts</p>
+<h1>What keeps returning to you?</h1>
+<p class="lead">Some thoughts keep coming back. This project gathers 139 of them from 32 DT students.</p>
+<label for="t">Write down one thought that keeps coming back.</label>
+<textarea id="t" rows="3" placeholder="I keep thinking about…"></textarea>
+<div class="row"><button id="go" class="pri">Leave it here for now</button><button id="skip">Explore without writing</button></div>
+<p class="note">Your thought stays in this browser tab. It is not saved and not added to the 139 research thoughts.</p>
+</section>
+<!-- SCREEN 2: similar thoughts -->
+<section id="s2" class="screen">
+<p class="eyebrow">The thought you brought</p>
+<div id="you" class="you"></div>
+<div id="near"></div>
+<h2 id="h2"></h2>
+<p id="p2" class="lead"></p>
+<button id="join" class="pri">Let it join the circle</button>
+</section>
+<!-- SCREEN 3: the circle -->
+<section id="s3" class="screen">
+<p class="eyebrow">The collective inner monologue</p>
+<h2>Where do these thoughts point?</h2>
+<p class="lead">Point at a line to light up similar thoughts, then move along the lit lines to read them.</p>
+<div class="wrap"><svg id="svg" viewBox="0 0 900 900" role="img" aria-label="A circle of 139 lines, one per thought. Lines pointing in are about the past, lines on the ring are about now, lines pointing out are about the future."></svg><div id="c"></div></div>
+<p class="key">Each line is one thought. On the ring: about right now. Pointing in: looking back. Pointing out: looking ahead. A longer line means more classmates wrote the same thing. Color shows the topic.</p>
+<button id="next" class="pri">Continue</button>
+</section>
+<!-- SCREEN 4: closing -->
+<section id="s4" class="screen">
+<p class="eyebrow">There is no empty circle</p>
+<h2>Some thoughts leave. Some return. Others take their place.</h2>
+<p class="lead">A way of seeing it: recurring thoughts may not be problems that can be permanently completed or removed. Seeing them together makes repetition visible—not as a personal failure, but as part of a shared mental life.</p>
+<p class="note">The circle shows 139 thoughts from 32 classmates, collected once. It doesn’t show how thoughts change over time.</p>
+<div class="row"><button id="again" class="pri">Bring another thought</button><button id="back">Back to the circle</button></div>
+<p class="note">If these thoughts feel overwhelming, talk to someone you trust.</p>
+</section>
+</main>
+<script>
+// DATA. One row per thought: [text, topic number, time (-1 past, 0 now, 1 future), similar-group number, how many classmates wrote the same phrase]
+const T=["School, Work & Making", "Self-Worth & Meaning", "People & Belonging", "Future & Place", "Sleep & Restless Mind", "Daily Life & Body", "Past & Memory"]; // topic names, in colour order c0..c6
+const D=[
+["Deadline", 0, 0, 0, 7],
+["There are still things I have to work on.", 0, 0, 1, 1],
+["I haven’t finished my assignment.", 0, 0, 1, 3],
+["Deadline", 0, 0, 0, 7],
+["Deadline", 0, 0, 0, 7],
+["Sometimes I suddenly wake up and think, ‘I haven’t finished my assignment.’", 0, 0, 1, 1],
+["I couldn’t find a class I like.", 0, 0, 2, 1],
+["When can I finish this?", 0, 0, 1, 1],
+["Deadline", 0, 0, 0, 7],
+["Deadline", 0, 0, 0, 7],
+["I’m trying to balance school and work.", 0, 0, 3, 1],
+["I have so many things to do. What should I do first?", 0, 0, 4, 1],
+["Deadline", 0, 0, 0, 7],
+["I want to do well on my assignment.", 0, 0, 5, 1],
+["I feel stressed about school.", 0, 0, 6, 1],
+["I haven’t finished my assignment.", 0, 0, 1, 3],
+["I haven’t finished my assignment.", 0, 0, 1, 3],
+["I need more time to work on it.", 0, 0, 0, 1],
+["I should finish this right now.", 0, 0, 0, 1],
+["I need to start this, but I have so much to do.", 0, 0, 1, 1],
+["The deadline is approaching, and I haven’t finished.", 0, 0, 0, 1],
+["Deadline", 0, 0, 0, 7],
+["There are so many things I want to try.", 0, 1, 7, 1],
+["What if I combine this material with that material?", 0, 1, 7, 1],
+["What material should I use for my next project?", 0, 1, 7, 1],
+["How can I finish the assignment?", 0, 1, 1, 1],
+["What should I make with different materials for my next project?", 0, 1, 7, 1],
+["What should I do for my project?", 0, 1, 7, 1],
+["My English is not good enough.", 1, 0, 5, 1],
+["Am I doing enough?", 1, 0, 5, 1],
+["Can I do more?", 1, 0, 5, 1],
+["Am I using all the resources I have?", 1, 0, 5, 1],
+["What am I studying this for?", 1, 0, 2, 1],
+["I feel like I didn’t express what I wanted to say clearly.", 1, 0, 8, 1],
+["Am I learning right now?", 1, 0, 2, 1],
+["Am I absorbing the knowledge well?", 1, 0, 2, 1],
+["Am I coding this correctly?", 1, 0, 5, 1],
+["What am I doing right now?", 1, 0, 9, 1],
+["Are the things I’m doing right now good for me?", 1, 0, 2, 1],
+["Am I meant to do this?", 1, 0, 2, 1],
+["Have I done enough?", 1, 0, 5, 1],
+["What do I really care about?", 1, 0, 2, 1],
+["I don’t know what I’m doing.", 1, 0, 9, 1],
+["I think about life.", 1, 0, 10, 1],
+["How can I prove myself?", 1, 0, 5, 1],
+["Am I doing well in general?", 1, 0, 5, 1],
+["I feel like I’m being left behind in class.", 1, 0, 5, 1],
+["I feel like I’m not keeping up.", 1, 0, 5, 1],
+["Am I good enough?", 1, 0, 5, 1],
+["Why do people exist? Why do I exist?", 1, 0, 10, 1],
+["How can I become a better person?", 1, 0, 5, 1],
+["I think about psychology.", 1, 0, 11, 1],
+["Do I need to prove my existence to God?", 1, 0, 10, 1],
+["Who is God?", 1, 0, 10, 1],
+["How can I do things by myself?", 1, 1, 12, 1],
+["I miss my cat.", 2, -1, 13, 1],
+["I think about awkward social moments.", 2, -1, 8, 1],
+["Am I speaking at the right time?", 2, -1, 8, 1],
+["Am I doing or saying something rude?", 2, -1, 8, 1],
+["I miss traveling with my friend.", 2, -1, 13, 1],
+["I think about an awkward moment.", 2, -1, 8, 2],
+["I should say more when my friend talks to me about their worries.", 2, -1, 8, 1],
+["I think a lot about the interactions I had during the day—what I did and who I interacted with.", 2, -1, 8, 1],
+["I think about an awkward moment in the past: why was I doing that?", 2, -1, 8, 1],
+["I think about awkward moments that happened before.", 2, -1, 8, 1],
+["Why did I say that on that occasion?", 2, -1, 8, 1],
+["I think about my family.", 2, -1, 13, 1],
+["I hope my family is doing well.", 2, -1, 13, 1],
+["I think about an awkward moment.", 2, -1, 8, 2],
+["I miss my family.", 2, -1, 13, 1],
+["Did I say something stupid in a previous conversation?", 2, -1, 8, 1],
+["I worry about how others react to me.", 2, 0, 8, 1],
+["Why can’t my family understand what I do?", 2, 0, 13, 1],
+["Is this where I belong?", 2, 0, 2, 1],
+["Did I remember to reply to messages or return calls from my family?", 2, 0, 13, 1],
+["I wish I could text or call my family more often.", 2, 0, 13, 1],
+["Should I stay in this relationship?", 2, 0, 14, 1],
+["Wow, I’m actually in New York.", 3, -1, 15, 1],
+["How lucky am I to be here in New York?", 3, -1, 15, 1],
+["Am I on the right path?", 3, 0, 9, 1],
+["When can I get a job?", 3, 1, 16, 1],
+["What should I do in the future?", 3, 1, 9, 3],
+["Can I get an internship?", 3, 1, 16, 1],
+["Can I get a job after graduation?", 3, 1, 16, 1],
+["Will this help me in the future?", 3, 1, 2, 1],
+["What can I do if I can’t get an internship?", 3, 1, 16, 1],
+["I worry about my visa.", 3, 1, 17, 1],
+["What should I do in the future?", 3, 1, 9, 3],
+["What kind of job do I want?", 3, 1, 9, 1],
+["What do I want to do in the future?", 3, 1, 9, 1],
+["Where am I heading with this degree?", 3, 1, 9, 1],
+["I’m worried about my visa.", 3, 1, 17, 1],
+["I want to stay in New York after graduation.", 3, 1, 17, 1],
+["How can I get a job?", 3, 1, 16, 1],
+["What should I do in the future?", 3, 1, 9, 3],
+["I think about the future.", 3, 1, 9, 1],
+["I have doubts about my career.", 3, 1, 9, 1],
+["I’m not sure which path I prefer.", 3, 1, 9, 1],
+["I should choose a path and stick to it.", 3, 1, 9, 1],
+["I have to sleep.", 4, 0, 18, 1],
+["I feel anxious every day.", 4, 0, 6, 1],
+["Even when I have nothing to do, I still can’t sleep.", 4, 0, 18, 1],
+["My brain never stops working.", 4, 0, 19, 1],
+["There is music playing in my head all the time.", 4, 0, 19, 1],
+["If I go to sleep right now, can I still get those things done?", 4, 0, 3, 1],
+["I didn’t get enough sleep.", 4, 0, 18, 1],
+["I have to finish this before I can go to sleep.", 4, 0, 3, 1],
+["I’m exhausted.", 4, 0, 6, 1],
+["I need to stop thinking about school and work so I can get to sleep.", 4, 0, 3, 1],
+["How can I get to sleep?", 4, 0, 18, 1],
+["I should get to sleep.", 4, 0, 18, 1],
+["I should go to sleep.", 4, 0, 18, 1],
+["Why can’t I fall asleep?", 4, 0, 18, 1],
+["I feel emotional before going to sleep.", 4, 0, 6, 1],
+["How many things am I thinking about?", 4, 0, 19, 1],
+["I should stop overthinking so I can get to bed.", 4, 0, 18, 1],
+["My pillow is uncomfortable.", 4, 0, 20, 1],
+["The temperature makes it hard for me to sleep.", 4, 0, 20, 1],
+["If I don’t get enough sleep, what can I do tomorrow?", 4, 1, 18, 1],
+["If I can’t fall asleep tonight, I’m going to get McDonald’s for breakfast.", 4, 1, 18, 1],
+["How much money have I been spending?", 5, 0, 21, 1],
+["I have to stop scrolling on my phone.", 5, 0, 22, 1],
+["Should I drink or smoke less?", 5, 0, 22, 1],
+["I worry about my health.", 5, 0, 22, 2],
+["There are things I haven’t done.", 5, 0, 1, 1],
+["There are things I have to do.", 5, 0, 1, 1],
+["I don’t have enough time.", 5, 0, 0, 1],
+["Did I pay my rent this month?", 5, 0, 21, 1],
+["I think about what to do and when to do it.", 5, 0, 4, 1],
+["I worry about my health.", 5, 0, 22, 2],
+["Can I be on time tomorrow?", 5, 1, 23, 1],
+["I think about my to-do list and try to organize my schedule.", 5, 1, 4, 1],
+["What should I spend my time on?", 5, 1, 4, 1],
+["I think about my past, especially my life before coming to the U.S.", 6, -1, 24, 1],
+["I think about good memories from the past.", 6, -1, 24, 2],
+["I think about good memories from the past.", 6, -1, 24, 2],
+["I think about a past relationship—my ex.", 6, -1, 14, 2],
+["I think about a past relationship—my ex.", 6, -1, 14, 2],
+["I should have said or expressed more on that occasion.", 6, -1, 8, 1]
+];
+// Where thoughts go: screens, circle, and matching. Data comes from data.js.
+const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
+const go=n=>{document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s'+n));window.scrollTo(0,0)};
+const ns=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+// ---------- 1. Draw the circle: one line per thought ----------
+const svg=$('svg'),c=$('c'),cx=450,cy=450,R=230;
+const def='<b>'+D.length+'</b><span>thoughts from 32 DT students</span><span>Point at or tap a line</span>';
+c.innerHTML=def;
+svg.append(ns('circle',{cx,cy,r:R,fill:'none',stroke:'var(--ring)','stroke-width':.8}));
+const byG={},V=[],A=[],hits=ns('g',{}),step=2*Math.PI/D.length;let a=Math.PI/2;
+T.forEach((name,k)=>{
+ const rows=D.map((d,i)=>[d,i]).filter(r=>r[0][1]===k),mid=a-rows.length*step/2;
+ const lx=cx+R*1.55*Math.cos(mid),ly=cy-R*1.55*Math.sin(mid),t=ns('text',{y:ly});
+ name.replace(' & ',' &\n').split('\n').forEach((s,j)=>{const ts=ns('tspan',{x:lx,dy:j?'1.25em':0});
+  if(!j){const dot=ns('tspan',{style:'fill:var(--c'+k+')'});dot.textContent='● ';ts.append(dot)}
+  ts.append(document.createTextNode(s));t.append(ts)});
+ svg.append(t);
+ rows.forEach(([d,i],j)=>{const th=a-j*step,L=.12+.07*Math.min(d[4]-1,6),tl=d[2];A[i]=th;
+  const [r0,r1]=tl==0?[1-.04-L/6,1+.04+L/6]:tl>0?[1,1+2*L]:[1,1-2*L];  // on the ring / in / out
+  const at={x1:cx+R*r0*Math.cos(th),y1:cy-R*r0*Math.sin(th),x2:cx+R*r1*Math.cos(th),y2:cy-R*r1*Math.sin(th)};
+  const v=ns('line',{...at,class:'v',style:'stroke:var(--c'+k+')'}),h=ns('line',{...at,class:'h'});
+  h.dataset.i=i;V[i]=v;svg.append(v);hits.append(h);(byG[d[3]]=byG[d[3]]||[]).push(v)});
+ a-=rows.length*step});
+svg.append(hits);
+
+// ---------- 2. Hover: light up a similar-thought group ----------
+let cur=-1,curEl=null;
+function clear(){svg.classList.remove('dim');svg.querySelectorAll('.on,.cur').forEach(v=>v.classList.remove('on','cur'));cur=-1;curEl=null}
+function off(){clear();c.innerHTML=def}
+function light(g){if(g!==cur){clear();cur=g;svg.classList.add('dim');(byG[g]||[]).forEach(v=>v.classList.add('on'))}}
+function show(i){light(D[i][3]);if(curEl)curEl.classList.remove('cur');curEl=V[i];curEl.classList.add('cur');c.innerHTML='<b>“'+esc(D[i][0])+'”</b>'}
+hits.addEventListener('pointerover',e=>{const h=e.target.closest('.h');if(h)show(+h.dataset.i)});
+svg.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')off()});
+svg.addEventListener('pointerdown',e=>{if(!e.target.closest('.h,.mkh'))off()});
+
+//#match-start
+// ---------- 3. Match a visitor's thought to the closest classmate thoughts (shared words) ----------
+const STOP=new Set('a an the and or but i me my we our you your it its is am are was were be been to of in on at for with so if that this these those can cant dont do does did not no just really very have has had will would should could how what why when who where about think thought keep again there than then them they'.split(' '));
+const tok=s=>(s.toLowerCase().replace(/[’']/g,'').match(/[a-z]+/g)||[]).map(w=>w.replace(/(ing|ed|es|s)$/,'')).filter(w=>w.length>2&&!STOP.has(w));
+const TK=D.map(d=>new Set(tok(d[0]))),df={};
+TK.forEach(s=>s.forEach(w=>df[w]=(df[w]||0)+1));
+const idf=w=>Math.log(1+D.length/(df[w]||1));   // rare shared words count more
+function match(text){
+ const q=tok(text);let best=-1,bs=0;
+ const sc=TK.map((s,i)=>{let x=0;q.forEach(w=>{if(s.has(w))x+=idf(w)});if(x>bs){bs=x;best=i}return x});
+ if(bs<1.2)return null;                           // 1.2 = how strict matching is; raise it to be stricter
+ const g=D[best][3],seen=new Set(),near=[];
+ sc.map((x,i)=>[x,i]).filter(p=>D[p[1]][3]===g).sort((u,v)=>v[0]-u[0]||Math.random()-.5).forEach(([x,i])=>{
+  const t=D[i][0];if(!seen.has(t)&&t.toLowerCase()!==text.trim().toLowerCase()){seen.add(t);near.push(t)}});
+ return{g,best,near:near.slice(0,6)}}
+//#match-end
+
+// ---------- 4. The visitor's own thought on the circle, and moving between screens ----------
+let you='',hit=null,mk=null;
+function drop(){if(mk){mk.remove();mk=null}}
+function mark(th){drop();mk=ns('g',{});const x=cx+R*Math.cos(th),y=cy-R*Math.sin(th);
+ const t=ns('text',{x:cx+(R+28)*Math.cos(th),y:cy-(R+28)*Math.sin(th)+5,class:'yl'});t.textContent='yours';
+ mk.append(ns('circle',{cx:x,cy:y,r:7,class:'pulse'}),ns('circle',{cx:x,cy:y,r:5,class:'dot'}),t,ns('circle',{cx:x,cy:y,r:14,fill:'transparent',class:'mkh'}));svg.append(mk)}
+function showYou(){if(hit)light(hit.g);else clear();c.innerHTML='<b>“'+esc(you)+'”</b><span>Your thought</span>'}
+svg.addEventListener('pointerover',e=>{if(e.target.closest('.mkh'))showYou()});
+$('go').onclick=()=>{const v=$('t').value.trim();if(!v){$('t').focus();return}
+ you=v;hit=match(v);$('you').textContent='“'+v+'”';
+ $('near').innerHTML=hit?hit.near.map((t,i)=>'<span class="chip" style="animation-delay:'+(i*.15)+'s">“'+esc(t)+'”</span>').join(''):'';
+ $('h2').textContent=hit?'Your thought has company':'Yours is new to this collection';
+ $('p2').textContent=hit?'These classmates wrote something close. The match comes from shared words and a theme coded by hand, so it is a suggestion, not a measurement.':'No classmate wrote anything close to it. It can still join the circle.';
+ go(2)};
+$('skip').onclick=()=>{you='';hit=null;drop();off();go(3)};
+$('join').onclick=()=>{off();mark(hit?A[hit.best]:Math.PI/2);go(3)};
+$('next').onclick=()=>go(4);
+$('back').onclick=()=>go(3);
+$('again').onclick=()=>{$('t').value='';you='';hit=null;drop();off();go(1)};
+</script>
+</body></html>
