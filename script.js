@@ -74,7 +74,8 @@ function match(text){
 
 // ---------- 3b. Matching by meaning: a small language model (MiniLM) that runs in the browser ----------
 // It downloads once (about 25 MB), then works offline. If it cannot load, the basic matcher above is used instead.
-const sem={ready:false},SEM_MIN=0.30;   // SEM_MIN = lowest similarity that counts as a match; raise it to be stricter
+// SEM_MIN: below this similarity nothing is shown. SEM_RANGE: a thought is shown only if it scores within this distance of the best match (smaller = fewer, stricter).
+const sem={ready:false},SEM_MIN=0.25,SEM_RANGE=0.15;
 (async()=>{const st=$('engine');
  try{st.textContent='Loading the meaning model… (first time only)';
   const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
@@ -86,8 +87,9 @@ const sem={ready:false},SEM_MIN=0.30;   // SEM_MIN = lowest similarity that coun
 async function smatch(text){
  const [q]=await sem.embed([text]);
  const rk=sem.V.map((v,i)=>[v.reduce((s,x,k)=>s+x*q[k],0),i]).sort((a,b)=>b[0]-a[0]);
+ console.table(rk.slice(0,12).map(([s,i])=>({score:s.toFixed(2),thought:D[i][0]})));   // press F12 > Console to see the scores
  if(rk[0][0]<SEM_MIN)return null;
- const floor=Math.max(SEM_MIN,rk[0][0]-0.25),seen={},idx=[];     // only thoughts close to the best one
+ const floor=Math.max(SEM_MIN,rk[0][0]-SEM_RANGE),seen={},idx=[];
  for(const [s,i] of rk){if(s<floor)break;const t=D[i][0];seen[t]=(seen[t]||0)+1;if(seen[t]<=4)idx.push(i);if(idx.length>=10)break}
  return{best:rk[0][1],idx,near:idx.map(i=>D[i][0]),g:D[rk[0][1]][3]}}
 
