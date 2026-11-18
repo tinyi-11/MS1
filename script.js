@@ -56,7 +56,7 @@ async function smatch(text){
  const [q]=await sem.embed([text]);
  const rk=sem.V.map((v,i)=>[v.reduce((s,x,k)=>s+x*q[k],0),i]).sort((a,b)=>b[0]-a[0]);
  const decision=chooseTopic(text,rk),topic=decision.topic;
- const inTopic=rk.filter(([,i])=>D[i][1]===topic),bestPair=inTopic[0];
+ const inTopic=rk.filter(([,i])=>D[i][1]===topic),bestPair=inTopic[0],globalBest=rk[0];
  console.groupCollapsed('Thought match: '+text);
  console.table(rk.slice(0,12).map(([s,i])=>({score:s.toFixed(3),topic:T[D[i][1]],thought:D[i][0]})));
  console.table(T.map((name,i)=>({topic:name,score:decision.scores[i].toFixed(3),hints:decision.evidence[i].join(', ')})).sort((a,b)=>b.score-a.score));
@@ -66,20 +66,27 @@ async function smatch(text){
  // Without a topic clue, require a slightly stronger semantic match so generic
  // phrases such as "I don't know" do not acquire arbitrary company.
  const minimum=decision.hinted?SOFT_MATCH:NO_HINT_MATCH;
- if(!bestPair||bestPair[0]<minimum)return{topic,best:null,idx:[],near:[],g:null,tier:'new',score:bestPair?.[0]??0};
+ const reference=Math.max(globalBest?.[0]??0,bestPair?.[0]??0);
+ if(reference<minimum)return{topic,best:null,idx:[],near:[],g:null,tier:'new',score:reference};
 
- const strong=bestPair[0]>=STRONG_MATCH;
- const range=strong?STRONG_RANGE:SOFT_RANGE;
- const limit=strong?10:4;
- const floor=Math.max(minimum,bestPair[0]-range),seen={},idx=[];
- for(const [s,i] of inTopic){
-  if(s<floor)break;
-  const t=D[i][0],key=t.toLowerCase().replace(/\s+/g,' ').trim();
-  if(!seen[key]){seen[key]=true;idx.push(i)};
-  if(idx.length>=limit)break
- }
- const best=bestPair[1];
- return{topic,best,idx,near:idx.map(i=>D[i][0]),g:D[best][3],tier:strong?'strong':'soft',score:bestPair[0]}}
+ // Topic is a preference, not a wall. Combine the strongest semantic echoes
+ // from the whole collection with several echoes from the selected topic.
+ // This lets a food/planning thought find a breakfast sentence even when that
+ // sentence was originally coded under Sleep & Restless Mind.
+ const strong=reference>=STRONG_MATCH,limit=strong?10:6;
+ const globalFloor=Math.max(minimum,globalBest[0]-(strong?.14:.08));
+ const topicFloor=Math.max(.16,(bestPair?.[0]??0)-(strong?.18:.12));
+ const pool=new Map();
+ const add=(list,floor,cap)=>{let n=0;for(const [s,i] of list){
+  if(s<floor||n>=cap)break;
+  const key=D[i][0].toLowerCase().replace(/\s+/g,' ').trim();
+  if(!pool.has(key)){pool.set(key,{i,s});n++}
+ }};
+ add(rk,globalFloor,strong?5:3);
+ add(inTopic,topicFloor,strong?8:5);
+ const idx=[...pool.values()].sort((a,b)=>(b.s+(D[b.i][1]===topic?.035:0))-(a.s+(D[a.i][1]===topic?.035:0))).slice(0,limit).map(x=>x.i);
+ const best=bestPair?.[1]??globalBest[1];
+ return{topic,best,idx,near:idx.map(i=>D[i][0]),g:D[best][3],tier:strong?'strong':'soft',score:reference}}
 
 // Scatter similar phrases around the visitor's thought (positions are % of the stage: [left, top])
 const SLOTS=[[22,13],[52,6],[80,15],[13,34],[87,36],[14,66],[86,64],[24,88],[52,94],[78,86]];
