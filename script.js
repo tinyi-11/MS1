@@ -69,7 +69,8 @@ function match(text){
  if(bs<1.2)return null;                           // 1.2 = how strict matching is; raise it to be stricter
  const g=D[best][3],seen={},near=[];
  sc.map((x,i)=>[x,i]).filter(p=>D[p[1]][3]===g).sort((u,v)=>v[0]-u[0]||Math.random()-.5).forEach(([x,i])=>{
-  const t=D[i][0];seen[t]=(seen[t]||0)+1;if(seen[t]<=4)near.push(t)});   // a phrase can repeat up to 4 times, like in your draft
+  const t=D[i][0],key=t.toLowerCase().replace(/\s+/g,' ').trim();
+  if(!seen[key]){seen[key]=true;near.push(t)}});   // screen 2 shows each distinct phrase once
  return{g,best,near:near.slice(0,10)}}
 //#match-end
 
@@ -169,8 +170,8 @@ async function smatch(text){
  const floor=Math.max(minimum,bestPair[0]-range),seen={},idx=[];
  for(const [s,i] of inTopic){
   if(s<floor)break;
-  const t=D[i][0];seen[t]=(seen[t]||0)+1;
-  if(seen[t]<=4)idx.push(i);
+  const t=D[i][0],key=t.toLowerCase().replace(/\s+/g,' ').trim();
+  if(!seen[key]){seen[key]=true;idx.push(i)};
   if(idx.length>=limit)break
  }
  const best=bestPair[1];
