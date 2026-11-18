@@ -29,6 +29,7 @@ svg.append(hits);
 let cur=-1,curEl=null;
 function clear(){svg.classList.remove('dim');svg.querySelectorAll('.on,.cur').forEach(v=>v.classList.remove('on','cur'));cur=-1;curEl=null}
 function off(){clear();c.innerHTML=def}
+function lightSet(ix){clear();cur=-2;svg.classList.add('dim');ix.forEach(i=>V[i].classList.add('on'))}
 function light(g){if(g!==cur){clear();cur=g;svg.classList.add('dim');(byG[g]||[]).forEach(v=>v.classList.add('on'))}}
 function show(i){light(D[i][3]);if(curEl)curEl.classList.remove('cur');curEl=V[i];curEl.classList.add('cur');c.innerHTML='<b>“'+esc(D[i][0])+'”</b>'}
 hits.addEventListener('pointerover',e=>{const h=e.target.closest('.h');if(h)show(+h.dataset.i)});
@@ -71,6 +72,25 @@ function match(text){
  return{g,best,near:near.slice(0,10)}}
 //#match-end
 
+// ---------- 3b. Matching by meaning: a small language model (MiniLM) that runs in the browser ----------
+// It downloads once (about 25 MB), then works offline. If it cannot load, the basic matcher above is used instead.
+const sem={ready:false},SEM_MIN=0.30;   // SEM_MIN = lowest similarity that counts as a match; raise it to be stricter
+(async()=>{const st=$('engine');
+ try{st.textContent='Loading the meaning model… (first time only)';
+  const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+  const ex=await pipeline('feature-extraction','Xenova/all-MiniLM-L6-v2',{progress_callback:p=>{if(p.status==='progress')st.textContent='Loading the meaning model… '+Math.round(p.progress)+'%'}});
+  sem.embed=async list=>(await ex(list,{pooling:'mean',normalize:true})).tolist();
+  sem.V=await sem.embed(D.map(d=>d[0]));
+  sem.ready=true;st.textContent='Matching by meaning is on.';
+ }catch(e){st.textContent='Basic matching is on (the meaning model could not load).';console.log(e)}})();
+async function smatch(text){
+ const [q]=await sem.embed([text]);
+ const rk=sem.V.map((v,i)=>[v.reduce((s,x,k)=>s+x*q[k],0),i]).sort((a,b)=>b[0]-a[0]);
+ if(rk[0][0]<SEM_MIN)return null;
+ const floor=Math.max(SEM_MIN,rk[0][0]-0.25),seen={},idx=[];     // only thoughts close to the best one
+ for(const [s,i] of rk){if(s<floor)break;const t=D[i][0];seen[t]=(seen[t]||0)+1;if(seen[t]<=4)idx.push(i);if(idx.length>=10)break}
+ return{best:rk[0][1],idx,near:idx.map(i=>D[i][0]),g:D[rk[0][1]][3]}}
+
 // Scatter similar phrases around the visitor's thought (positions are % of the stage: [left, top])
 const SLOTS=[[22,13],[52,6],[80,15],[13,34],[87,36],[14,66],[86,64],[24,88],[52,94],[78,86]];
 function scatter(list){const st=$('stage');st.querySelectorAll('.ph').forEach(e=>e.remove());
@@ -85,14 +105,14 @@ function drop(){if(mk){mk.remove();mk=null}}
 function mark(th){drop();mk=ns('g',{});const x=cx+R*Math.cos(th),y=cy-R*Math.sin(th);
  const t=ns('text',{x:cx+(R+28)*Math.cos(th),y:cy-(R+28)*Math.sin(th)+5,class:'yl'});t.textContent='yours';
  mk.append(ns('circle',{cx:x,cy:y,r:7,class:'pulse'}),ns('circle',{cx:x,cy:y,r:5,class:'dot'}),t,ns('circle',{cx:x,cy:y,r:14,fill:'transparent',class:'mkh'}));svg.append(mk)}
-function showYou(){if(hit)light(hit.g);else clear();c.innerHTML='<b>“'+esc(you)+'”</b><span>Your thought</span>'}
+function showYou(){if(hit&&hit.idx)lightSet(hit.idx);else if(hit)light(hit.g);else clear();c.innerHTML='<b>“'+esc(you)+'”</b><span>Your thought</span>'}
 svg.addEventListener('pointerover',e=>{if(e.target.closest('.mkh'))showYou()});
-$('go').onclick=()=>{const v=$('t').value.trim();if(!v){$('t').focus();return}
+$('go').onclick=async()=>{const v=$('t').value.trim();if(!v){$('t').focus();return}
  if(CRISIS.test(v)){you='';hit=null;$('stage').style.display='none';$('h2').textContent='Thank you for writing that down';
   $('p2').textContent='This project can’t respond to something this heavy, and your words won’t be added. If you might hurt yourself, please contact someone you trust or a crisis line now. In the US, you can call or text 988.';
   $('join').textContent='Start again';$('join').dataset.mode='again';go(2);return}
  $('stage').style.display='';$('join').textContent='Let it join the circle';$('join').dataset.mode='';
- you=v;hit=match(v);$('you').textContent='“'+v+'”';scatter(hit?hit.near:[]);
+ you=v;hit=sem.ready?await smatch(v):match(v);$('you').textContent='“'+v+'”';scatter(hit?hit.near:[]);
  $('h2').textContent=hit?'Your thought has company':'Yours is new to this collection';
  $('p2').textContent=hit?'These classmates wrote something close. The match comes from shared words and a theme coded by hand, so it is a suggestion, not a measurement.':'No classmate wrote anything close to it. It can still join the circle.';
  go(2)};
