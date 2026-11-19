@@ -30,12 +30,13 @@ svg.append(hits);
 let cur=-1,curEl=null;
 function clear(){svg.classList.remove('dim');svg.querySelectorAll('.on,.cur').forEach(v=>v.classList.remove('on','cur'));cur=-1;curEl=null}
 function off(){clear();c.innerHTML=def}
+function home(){if(mk)showYou();else off()}   // the starting view: the visitor's own thought and its connected lines (or all lines if they skipped writing)
 function lightSet(ix){clear();cur=-2;svg.classList.add('dim');ix.forEach(i=>V[i].classList.add('on'))}
 function light(g){if(g!==cur){clear();cur=g;svg.classList.add('dim');(byG[g]||[]).forEach(v=>v.classList.add('on'))}}
 function show(i){light(D[i][3]);if(curEl)curEl.classList.remove('cur');curEl=V[i];curEl.classList.add('cur');c.innerHTML='<b>“'+esc(D[i][0])+'”</b>'}
 hits.addEventListener('pointerover',e=>{const h=e.target.closest('.h');if(h)show(+h.dataset.i)});
-svg.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')off()});
-svg.addEventListener('pointerdown',e=>{if(!e.target.closest('.h,.mkh'))off()});
+svg.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')home()});
+svg.addEventListener('pointerdown',e=>{if(!e.target.closest('.h,.mkh'))home()});
 
 //#match-start
 // ---------- 3. Match a visitor's thought to the closest classmate thoughts (shared words) ----------
@@ -227,7 +228,7 @@ $('go').onclick=async()=>{const v=$('t').value.trim();if(!v){$('t').focus();retu
 $('skip').onclick=()=>{you='';hit=null;drop();off();go(3)};
 $('join').onclick=()=>{if($('join').dataset.mode==='again')return $('again').onclick();off();
  const th=hit&&hit.best!=null?A[hit.best]:hit&&hit.topic!=null?topicAngle[hit.topic]:Math.PI/2;
- mark(th);go(3)};
+ mark(th);showYou();go(3)};
 $('next').onclick=()=>go(4);
-$('back').onclick=()=>go(3);
+$('back').onclick=()=>{home();go(3)};
 $('again').onclick=()=>{$('t').value='';you='';hit=null;drop();off();go(1)};
