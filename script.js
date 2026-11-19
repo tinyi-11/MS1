@@ -186,10 +186,18 @@ async function smatch(text){
 
 // Scatter similar phrases around the visitor's thought (positions are % of the stage: [left, top])
 const SLOTS=[[22,13],[52,6],[80,15],[13,34],[87,36],[14,66],[86,64],[24,88],[52,94],[78,86]];
+const WIDE=[1,8],LONG=70;   // WIDE = the roomy slots (top-centre, bottom-centre); a phrase longer than LONG characters counts as long
 function scatter(list){const st=$('stage');st.querySelectorAll('.ph').forEach(e=>e.remove());
  const cnt={};list.forEach(t=>cnt[t]=(cnt[t]||0)+1);
- list.slice(0,SLOTS.length).forEach((t,i)=>{const p=document.createElement('div');p.className='ph'+(cnt[t]>1?' rep':'');p.textContent='“'+t+'”';
-  p.style.cssText='left:'+SLOTS[i][0]+'%;top:'+SLOTS[i][1]+'%;--r:'+((i*37%7)-3)+'deg;animation-delay:'+(i*.12)+'s,'+(i*.7)+'s;animation-duration:.9s,'+(7+i%4)+'s';st.append(p)})}
+ const items=list.slice(0,SLOTS.length).map((t,i)=>({t,i,show:t,cls:cnt[t]>1?' rep':''})),free=SLOTS.map((_,k)=>k);
+ items.filter(x=>x.t.length>LONG).forEach(x=>{                   // long phrases, closest first
+  const w=WIDE.find(k=>free.includes(k));
+  if(w!==undefined){free.splice(free.indexOf(w),1);x.slot=w;x.cls+=' wide'}   // a roomy slot, shown in full
+  else if(x.i<3)x.cls+=' long';                                  // one of the 3 closest: still shown in full, in smaller type
+  else x.show=x.t.slice(0,LONG-20).trim()+'…'});                 // less close: show only the beginning
+ items.forEach(x=>{if(x.slot===undefined)x.slot=free.shift()});
+ items.forEach(x=>{const p=document.createElement('div'),s=SLOTS[x.slot];p.className='ph'+x.cls;p.textContent='“'+x.show+'”';
+  p.style.cssText='left:'+s[0]+'%;top:'+s[1]+'%;--r:'+((x.slot*37%7)-3)+'deg;animation-delay:'+(x.i*.12)+'s,'+(x.i*.7)+'s;animation-duration:.9s,'+(7+x.i%4)+'s';st.append(p)})}
 const CRISIS=/\b(suicid|kill myself|end my life|want to die|self.?harm|hurt myself|better off dead)/i;
 
 // ---------- 4. The visitor's own thought on the circle, and moving between screens ----------
@@ -208,7 +216,8 @@ $('go').onclick=async()=>{const v=$('t').value.trim();if(!v){$('t').focus();retu
  // If the visitor submits during the model's first download, wait for the same
  // meaning engine instead of silently switching to the less accurate fallback.
  $('go').disabled=true;
- try{if(!sem.ready&&sem.loading)await sem.loading;hit=sem.ready?await smatch(v):match(v)}
+ try{if(!sem.ready&&sem.loading)await Promise.race([sem.loading,new Promise(r=>setTimeout(r,15000))]);   // wait up to 15 seconds for the model, then use the basic matcher
+  hit=sem.ready?await smatch(v):match(v)}
  finally{$('go').disabled=false}
  you=v;$('you').textContent='“'+v+'”';
  const hasCompany=!!(hit&&hit.near&&hit.near.length),soft=hasCompany&&hit.tier==='soft';scatter(hasCompany?hit.near:[]);
