@@ -202,7 +202,7 @@ function showYou(){if(hit&&hit.idx&&hit.idx.length)lightSet(hit.idx);else if(hit
 svg.addEventListener('pointerover',e=>{if(e.target.closest('.mkh'))showYou()});
 $('go').onclick=async()=>{const v=$('t').value.trim();if(!v){$('t').focus();return}
  if(CRISIS.test(v)){you='';hit=null;$('stage').style.display='none';$('h2').textContent='Thank you for writing that down';
-  $('p2').textContent=hasCompany?'These classmates wrote something close. This project gathers 139 of them from 32 DT students.':'No classmate wrote anything close enough to show. It can still join the circle.';
+  $('p2').textContent='This project can’t respond to something this heavy, and your words won’t be added. If you might hurt yourself, please contact someone you trust or a crisis line now. In the US, you can call or text 988.';
   $('join').textContent='Start again';$('join').dataset.mode='again';go(2);return}
  $('stage').style.display='';$('join').textContent='Let it join the circle';$('join').dataset.mode='';
  // If the visitor submits during the model's first download, wait for the same
@@ -213,7 +213,7 @@ $('go').onclick=async()=>{const v=$('t').value.trim();if(!v){$('t').focus();retu
  you=v;$('you').textContent='“'+v+'”';
  const hasCompany=!!(hit&&hit.near&&hit.near.length),soft=hasCompany&&hit.tier==='soft';scatter(hasCompany?hit.near:[]);
  $('h2').textContent=hasCompany?(soft?'Your thought has a few echoes':'Your thought has company'):'Yours is new to this collection';
- $('p2').textContent=hasCompany?(soft?'These are the nearest echoes in this small collection—not exact matches.':'These classmates wrote something close. The match combines meaning-based similarity with topics coded by hand, so it is a suggestion, not a measurement.'):'No classmate wrote anything close enough to show. It can still join the circle.';
+ $('p2').textContent=hasCompany?'These classmates wrote something close. This project gathers 139 of them from 32 DT students.':'No classmate wrote anything close enough to show. It can still join the circle.';
  go(2)};
 $('skip').onclick=()=>{you='';hit=null;drop();off();go(3)};
 $('join').onclick=()=>{if($('join').dataset.mode==='again')return $('again').onclick();off();
