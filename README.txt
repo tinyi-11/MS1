@@ -7,5 +7,5 @@ What to edit
 - index.html: all the words on the 4 screens.
 - style.css: colours (top of the file), fonts, sizes.
 - data.js: the 139 thoughts. Each row is [text, topic number, time, similar-group number, repeat count].
-- script.js: how the circle is drawn and how a typed thought is matched (look for "1.2" to change how strict matching is).
+- script.js: how the circle is drawn and how a typed thought is matched (look for STRONG_MATCH, SOFT_MATCH and NO_HINT_MATCH to change how strict matching is).
 Tip: copy the whole folder before big changes.
